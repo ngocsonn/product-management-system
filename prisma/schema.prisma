@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("user")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Float
+  category    String
+  subCategory String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  likings     Liking[]
+
+  @@map("product")
+}
+
+model Liking {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  status    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique(name: "likeId", [userId, productId])
+  @@map("liking")
+}
