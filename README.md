@@ -1,6 +1,6 @@
 
 ## Setup & installation instructions
-- Create .env file: `move .env.example .env` and update env variables
+- Create .env file: `mv .env.example .env` and update env variables
 ### Use docker
 - Move to repository: `cd product-management-system`
 - Run command `docker compose up -d --build`
