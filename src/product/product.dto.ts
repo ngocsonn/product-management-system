@@ -69,6 +69,8 @@ export class ProductResponseDto {
   subCategory: string;
 
   @Expose({ name: 'liking' })
-  @Transform(({ obj }) => Number(obj._count.likings))
+  @Transform(({ obj }) =>
+    obj?._count?.likings ? Number(obj._count.likings) : 0,
+  )
   liking: number;
 }

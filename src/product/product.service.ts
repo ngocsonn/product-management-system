@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Liking, Prisma, Product } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductDto, ProductListDto } from './product.dto';
@@ -36,33 +36,37 @@ export class ProductService {
   }
 
   async like(data: IProductLikeRequest): Promise<Product> {
-    const { userId, productId } = data;
-    const productLike = await this.prisma.liking.findFirst({
-      where: { userId, productId },
-    });
-    const liking = await this.prisma.liking.upsert({
-      where: {
-        likeId: {
+    try {
+      const { userId, productId } = data;
+      const productLike = await this.prisma.liking.findFirst({
+        where: { userId, productId },
+      });
+      const liking = await this.prisma.liking.upsert({
+        where: {
+          likeId: {
+            productId,
+            userId,
+          },
+        },
+        create: {
           productId,
           userId,
+          status: true,
         },
-      },
-      create: {
-        productId,
-        userId,
-        status: true,
-      },
-      update: {
-        status: !productLike?.status,
-      },
-      select: {
-        product: true,
-      },
-    });
-    const products = await this.prisma.product.findMany(includeQuery);
-    // update cache
-    this.cache.set(products);
-    return liking.product;
+        update: {
+          status: !productLike?.status,
+        },
+        select: {
+          product: true,
+        },
+      });
+      const products = await this.prisma.product.findMany(includeQuery);
+      // update cache
+      this.cache.set(products);
+      return liking.product;
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 
   async findAll(query?: ProductListDto): Promise<IProductDataCache[]> {
